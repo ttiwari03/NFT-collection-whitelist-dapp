@@ -8,18 +8,14 @@ import { WHITELIST_CONTRACT_ADDRESS, abi } from "../constants";
 export default function Home() {
 	// walletConnected keep track of whether the user's wallet is connected or not
 	const [walletConnected, setWalletConnected] = useState(false);
-
 	// joinedWhitelist keeps track of whether the current metamask address has joined the Whitelist or not
 	const [joinedWhitelist, setJoinedWhitelist] = useState(false);
-
 	// loading is set to true when we are waiting for a transaction to get mined
 	const [loading, setLoading] = useState(false);
-
 	// numberOfWhitelisted tracks the number of addresses's whitelisted
 	const [numberOfWhitelisted, setNumberOfWhitelisted] = useState(0);
-
 	// Create a reference to the Web3 Modal (used for connecting to Metamask) which persists as long as the page is open
-	const web3ModalRef = useRef;
+	const web3ModalRef = useRef();
 
 	/**
 	 * Returns a Provider or Signer object representing the Ethereum RPC with or without the
@@ -37,7 +33,7 @@ export default function Home() {
 		// Connect to Metamask
 		// Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
 		const provider = await web3ModalRef.current.connect();
-		const web3Provider = new provider.Web3Provider(provider);
+		const web3Provider = new providers.Web3Provider(provider);
 
 		// If user is not connected to the Goerli network, let them know and throw an error
 		const { chainId } = await web3Provider.getNetwork();
@@ -50,7 +46,6 @@ export default function Home() {
 			const signer = web3Provider.getSigner();
 			return signer;
 		}
-
 		return web3Provider;
 	};
 
@@ -61,7 +56,6 @@ export default function Home() {
 		try {
 			// We need a Signer here since this is a 'write' transaction.
 			const signer = await getProviderOrSigner(true);
-
 			// Create a new instance of the Contract with a Signer, which allows
 			// update methods
 			const whitelistContract = new Contract(
@@ -69,18 +63,15 @@ export default function Home() {
 				abi,
 				signer
 			);
-
 			// call the addAddressToWhitelist from the contract
 			const tx = await whitelistContract.addAddressToWhitelist();
 			setLoading(true);
-
 			// wait for the transaction to get mined
 			await tx.wait();
 			setLoading(false);
-
 			// get the updated number of addresses in the whitelist
 			await getNumberOfWhitelisted();
-			setJoinWhitelist(true);
+			setJoinedWhitelist(true);
 		} catch (err) {
 			console.error(err);
 		}
@@ -94,7 +85,6 @@ export default function Home() {
 			// Get the provider from web3Modal, which in our case is MetaMask
 			// No need for the Signer here, as we are only reading state from the blockchain
 			const provider = await getProviderOrSigner();
-
 			// We connect to the Contract using a Provider, so we will only
 			// have read-only access to the Contract
 			const whitelistContract = new Contract(
@@ -102,11 +92,9 @@ export default function Home() {
 				abi,
 				provider
 			);
-
 			// call the numAddressesWhitelisted from the contract
 			const _numberOfWhitelisted =
 				await whitelistContract.numAddressesWhitelisted();
-
 			setNumberOfWhitelisted(_numberOfWhitelisted);
 		} catch (err) {
 			console.error(err);
@@ -127,15 +115,12 @@ export default function Home() {
 				abi,
 				signer
 			);
-
 			// Get the address associated to the signer which is connected to  MetaMask
 			const address = await signer.getAddress();
-
 			// call the whitelistedAddresses from the contract
 			const _joinedWhitelist = await whitelistContract.whitelistedAddresses(
 				address
 			);
-
 			setJoinedWhitelist(_joinedWhitelist);
 		} catch (err) {
 			console.error(err);
@@ -159,6 +144,9 @@ export default function Home() {
 		}
 	};
 
+	/*
+    renderButton: Returns a button based on the state of the dapp
+  */
 	const renderButton = () => {
 		if (walletConnected) {
 			if (joinedWhitelist) {
@@ -179,7 +167,7 @@ export default function Home() {
 		} else {
 			return (
 				<button onClick={connectWallet} className={styles.button}>
-					Connect Wallet
+					Connect your wallet
 				</button>
 			);
 		}
@@ -196,7 +184,7 @@ export default function Home() {
 			web3ModalRef.current = new Web3Modal({
 				network: "goerli",
 				providerOptions: {},
-				disableInjectionProvider: false,
+				disableInjectedProvider: false,
 			});
 			connectWallet();
 		}
@@ -205,23 +193,23 @@ export default function Home() {
 	return (
 		<div>
 			<Head>
-				<title>Whitelist DAPP</title>
-				<meta name="description" content="whitelist-Dapp" />
+				<title>Whitelist Dapp</title>
+				<meta name="description" content="Whitelist-Dapp" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<div className={styles.main}>
 				<div>
 					<h1 className={styles.title}>Welcome to Crypto Devs!</h1>
-					<div className={styles.descriptiom}>
-						It's an NFT collection for developers in Crypto.
+					<div className={styles.description}>
+						Its an NFT collection for developers in Crypto.
 					</div>
 					<div className={styles.description}>
-						{numberOfWhitelisted} have already joined the Whitelist.
+						{numberOfWhitelisted} have already joined the Whitelist
 					</div>
 					{renderButton()}
 				</div>
 				<div>
-					<img className={styles.image} src="./crypto-devs.svg" />
+					<img className={styles.image} src="./crypto-devs.svg" alt="" />
 				</div>
 			</div>
 
